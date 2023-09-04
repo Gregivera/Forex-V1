@@ -1,0 +1,882 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Cryptocurrency - Landing Page Template</title>
+	<meta charset="UTF-8">
+	<meta name="description" content="Cryptocurrency Landing Page Template">
+	<meta name="keywords" content="cryptocurrency, unica, creative, html">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Favicon -->
+	<link href="/static/img/favicon.ico" rel="shortcut icon"/>
+
+	<!-- Google Fonts -->
+	<link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+
+	<!-- Stylesheets -->
+	<link rel="stylesheet" href="/static/css/bootstrap.min.css"/>
+	<link rel="stylesheet" href="/static/css/font-awesome.min.css"/>
+	<link rel="stylesheet" href="/static/css/themify-icons.css"/>
+	<link rel="stylesheet" href="/static/css/animate.css"/>
+	<link rel="stylesheet" href="/static/css/owl.carousel.css"/>
+	<link rel="stylesheet" href="/static/css/style.css"/>
+
+
+	  <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+	  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <style>
+      /* ... (existing styles) ... */
+      .right-side-container {
+        position: absolute;
+        top: 150px;
+        right: 50px;
+        display: flex;
+        flex-direction: column;
+        background-color: #ffffff;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 10px;
+      }
+
+      .input-group label {
+        margin-bottom: 5px;
+      }
+
+      .buttons {
+        display: flex;
+      }
+
+      /* ... (existing styles) ... */
+	  .star-checkbox {
+		display: inline-block;
+		cursor: pointer;
+		}
+
+		.star-icon {
+		width: 20px;
+		height: 20px;
+		fill: white;
+		stroke: blue;
+		stroke-width: 2;
+		transition: fill 0.2s ease;
+		}
+
+		.star-checkbox input[type="checkbox"] {
+		display: none;
+		}
+
+		.star-checkbox input[type="checkbox"]:checked + svg {
+		fill: blue;
+		}
+
+    </style>
+</head>
+<body>
+	<!-- Page Preloder -->
+	<div id="preloder">
+		<div class="loader"></div>
+	</div>
+
+	<!-- Header section -->
+	<header class="header-section clearfix">
+		<div class="container-fluid">
+			<a href="{% url 'home' %}" class="site-logo">
+				<img src="/static/img/logo.png" alt="">
+			</a>
+			{% if user.is_authenticated %}
+			<div class="responsive-bar">
+				<i class="fa fa-bars"></i>
+			</div>
+			<a href="" class="user">
+				<i class="fa fa-user"></i>
+			</a>
+			<a href="" class="site-btn" style="color: rgb(38, 38, 117);" >{{user.username}}</a>
+			<!-- Use Font Awesome's user icon -->
+			<!-- If the user is not authenticated, show sign up -->
+			{% else %}
+			<div class="responsive-bar">
+				<i class="fa fa-bars"></i>
+			</div>
+			<a href="" class="user">
+				<i class="fa fa-user"></i>
+			</a>
+			<a href="{% url 'sign_up' %}" style="color: rgb(38, 38, 117);" class="site-btn">Sign Up Free</a>
+			{% endif %}
+			<nav class="main-menu">
+				<ul class="menu-list">
+					<li><a style="color: rgb(38, 38, 117);" href="{% url 'trading' %}">Trading</a></li>
+					<li><a style="color: rgb(38, 38, 117);" href="{% url 'options' symbol='LIONTC' %}">Options</a></li>
+					<li><a style="color: rgb(38, 38, 117);" href="">News</a></li>
+					<li><a style="color: rgb(38, 38, 117);" href="">About</a></li>
+					<li><a style="color: rgb(38, 38, 117);" href="">Contact</a></li>
+				</ul>
+			</nav>
+		</div>
+	</header>
+	<!-- Header section end -->
+
+
+	<!-- TradingView Widget BEGIN -->
+  <div class="tradingview-widget-container">
+    <div id="tradingview_13fd6" style="height: 500px; margin-top: 150px; margin-left: 50px; width: 1000px;"></div>
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script type="text/javascript">
+    new TradingView.widget(
+    {
+    "autosize": true,
+	{% if 'pair' in request.resolver_match.url_name %}
+    "symbol": "FX:{{currency_pair}}",
+	{% else %}
+	"symbol": "FX:EURUSD",
+	{% endif %}
+    "interval": "D",
+    "timezone": "Etc/UTC",
+    "theme": "light",
+    "style": "1",
+    "locale": "en",
+    "toolbar_bg": "#f1f3f6",
+    "enable_publishing": false,
+    "studies": [
+      "STD;RSI"
+    ],
+    "container_id": "tradingview_13fd6"
+  }
+    );
+    </script>
+  </div>
+  <!-- TradingView Widget END -->
+  
+
+  <!-- Right Side Container -->
+  <div class="right-side-container">
+    <h5>Demo Account: {{demo_account_balance}}</h5>
+	<h5>Balance Equity: {{balance_equity|floatformat:2}}</h5>
+    <p class="responsive" style="font-size: 30px; color: black;">Place Trades</p>
+	<form id="trade-form" method="post" action="{% url 'place_trade' direction='SELL' %}">
+		{% csrf_token %}
+		<div class="inputs">
+		  <!-- Add this to your trading.html, where you want to display the symbol -->
+		  {% if 'pair' in request.resolver_match.url_name %}
+		  <div class="input-group">
+			<label for="symbol">Symbol:</label>
+			<input type="text" id="symbol" name="symbol" value="{{currency_pair}}">
+		  </div>
+		  {% else %}
+		  <div class="input-group">
+			<label for="symbol">Symbol:</label>
+			<input type="text" id="symbol" name="symbol" value="EURUSD">
+		  </div>
+	      {% endif %}
+		  
+		  <!-- Add this hidden input field inside your form to store the scraped symbol for submission -->
+		  <div class="input-group">
+			<label for="lot_size">Lot Size:</label>
+			<input type="number" id="lot_size" name="lot_size" placeholder="Enter lot size" required>
+		  </div>
+		  {% if 'pair' in request.resolver_match.url_name %}
+		  <div class="input-group">
+			<label for="entry">Entry Price:</label>
+			<input type="number" id="entry" name="entry" value="{{pair_price}}">
+		  </div>
+		  {% else %}
+		  <div class="input-group">
+			<label for="entry">Entry Price:</label>
+			<input type="number" id="entry" name="entry" value="{{default_price}}">
+		  </div>
+	      {% endif %}
+		  <div class="input-group">
+			<label for="stop_loss">Stop Loss:</label>
+			<input type="number" id="stop_loss" name="stop_loss" step="0.0001" placeholder="Enter stop loss amount" required>
+		  </div>
+		  <div class="input-group">
+			<label for="take_profit">Take Profit:</label>
+			<input type="number" id="take_profit" name="take_profit" step="0.0001" placeholder="Enter take profit amount" required>
+		  </div>
+		</div>
+		<div class="buttons">
+		  <!-- Buy Button with SVG Arrow -->
+		  <button style="color: blue;" class="buy-button" type="submit" onclick="buyDirection('BUY')">
+			Buy
+			<svg xmlns="http://www.w3.org/2000/svg"  width="25" height="25" fill="white" class="bi bi-arrow-down" viewBox="0 0 16 16">
+			  <path d="M10.854 8.854a.5.5 0 0 1-.708 0L8 7.207 5.854 9.354a.5.5 0 0 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708z"/>
+			</svg>
+		</button>
+	  
+		<!-- Sell Button with SVG Arrow -->
+		<button style="color: red;" class="sell-button" type="submit" onclick="sellDirection('SELL')">
+			Sell
+			<svg xmlns="http://www.w3.org/2000/svg"  width="25" height="25" fill="white" class="bi bi-arrow-up" viewBox="0 0 16 16">
+			  <path d="M10.854 8.354a.5.5 0 0 1 .146.708l-3 4a.5.5 0 0 1-.708 0l-3-4a.5.5 0 0 1 .708-.708L8 11.293l2.146-2.147a.5.5 0 0 1 .708 0z"/>
+			</svg>
+		</button>
+		</div>
+	  </form>
+	  <script>
+		function buyDirection(direction) {
+			document.getElementById("trade-form").action = "{% url 'place_trade' direction='BUY' %}"
+			document.getElementById("trade-form").submit();
+		}
+		function sellDirection(direction) {
+			document.getElementById("trade-form").action = "{% url 'place_trade' direction='SELL' %}"
+			document.getElementById("trade-form").submit();
+		}
+	  </script>
+  </div>
+	<!--
+  Heads up! 👋
+
+  This component comes with some `rtl` classes. Please remove them if they are not needed in your project.
+-->
+
+<div class="overflow-x-auto"style="margin-left: 30px;">
+	<table class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
+		<thead class="ltr:text-left rtl:text-right">
+		  <tr>
+			<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+			  Symbol
+			</th>
+			<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+			  Price
+			</th>
+		</thead>
+	
+		<tbody class="divide-y divide-gray-200">
+		  {% for currency_pair, price in forex_prices.items %}
+		  <tr>
+			<td class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+			  {{currency_pair}}
+			</td>
+			<td class="whitespace-nowrap px-4 py-2 text-gray-700">{{price}}</td>
+			<td class="whitespace-nowrap px-4 py-2">
+			  <a
+				href="{% url 'selected_pair' currency_pair=currency_pair.symbol %}"
+				class="col-lg-6 offset-lg-6 about-text"
+			  >
+				View
+			  </a>
+			</td>
+		  </tr>
+		  {% endfor %}
+		</tbody>
+	  </table>
+  </div>
+  <h3 style="margin-left: 50px;">My Trades</h3>
+  <div class="overflow-x-auto" style="margin-left: 30px;">
+	<table class="min-w-full divide-y-2 divide-gray-200 bg-white text-sm">
+		<thead class="ltr:text-left rtl:text-right">
+		  <tr>
+			<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+			  Symbol
+			</th>
+			<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+			  Entry Price
+			</th>
+			<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+			  Stop Loss
+			</th>
+			<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+			  Take Profit
+			</th>
+			<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+			  P/L
+			</th>
+			<th class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+			  Time
+			</th>
+		</thead>
+	
+		<tbody class="divide-y divide-gray-200">
+		  {% for trade in trades %}
+		  <tr>
+			<td class="whitespace-nowrap px-4 py-2 font-medium text-gray-900">
+			  {{trade.symbol}}
+			</td>
+			<td class="whitespace-nowrap px-4 py-2 text-gray-700">{{trade.entry}}</td>
+			<td class="whitespace-nowrap px-4 py-2 text-gray-700">{{trade.stop_loss}}</td>
+			<td class="whitespace-nowrap px-4 py-2 text-gray-700">{{trade.take_profit}}</td>
+			<td class="whitespace-nowrap px-4 py-2 text-gray-700" style="color: 
+				{% if trade.equity < 0 %}
+					red;
+				{% elif trade.equity > 0 %}
+					green;
+				{% else %}
+					black;
+				{% endif %}">
+				{{ trade.equity|floatformat:2 }}
+			</td>
+			<td class="whitespace-nowrap px-4 py-2 text-gray-700">{{trade.created_at}}</td>
+		  </tr>
+		  {% endfor %}
+		</tbody>
+	  </table>
+  </div>
+  <!--
+  Heads up! 👋
+
+  This component comes with some `rtl` classes. Please remove them if they are not needed in your project.
+-->
+
+
+	<!-- About section -->
+	<h2 style="margin-left: 50px;">Forex Cross Rates</h2>
+	<!-- TradingView Widget BEGIN -->
+	<div class="tradingview-widget-container" style="margin-left: 50px;">
+		<div class="tradingview-widget-container__widget"></div>
+		<script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-forex-cross-rates.js" async>
+		{
+		"width": 770,
+		"height": 400,
+		"currencies": [
+		"EUR",
+		"USD",
+		"JPY",
+		"GBP",
+		"CHF",
+		"AUD",
+		"CAD",
+		"NZD"
+		],
+		"isTransparent": false,
+		"colorTheme": "light",
+		"locale": "en"
+	}
+		</script>
+	</div>
+	<!-- TradingView Widget END -->
+	<!-- About section end -->
+
+	<!-- Features section -->
+	<section class="features-section spad gradient-bg">
+		<div class="container text-white">
+			<div class="section-title text-center">
+				<h2>Our Features</h2>
+				<p>Bitcoin is the simplest way to exchange money at very low cost.</p>
+			</div>
+			<div class="row">
+				<!-- feature -->
+				<div class="col-md-6 col-lg-4 feature">
+					<i class="ti-mobile"></i>
+					<div class="feature-content">
+						<h4>Mobile Apps</h4>
+						<p>Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum. </p>
+						<a href="" class="readmore">Readmore</a>
+					</div>
+				</div>
+				<!-- feature -->
+				<div class="col-md-6 col-lg-4 feature">
+					<i class="ti-shield"></i>
+					<div class="feature-content">
+						<h4>Safe & Secure</h4>
+						<p>Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum. </p>
+						<a href="" class="readmore">Readmore</a>
+					</div>
+				</div>
+				<!-- feature -->
+				<div class="col-md-6 col-lg-4 feature">
+					<i class="ti-wallet"></i>
+					<div class="feature-content">
+						<h4>Wallet</h4>
+						<p>Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum. </p>
+						<a href="" class="readmore">Readmore</a>
+					</div>
+				</div>
+				<!-- feature -->
+				<div class="col-md-6 col-lg-4 feature">
+					<i class="ti-headphone-alt"></i>
+					<div class="feature-content">
+						<h4>Experts Support</h4>
+						<p>Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum. </p>
+						<a href="" class="readmore">Readmore</a>
+					</div>
+				</div>
+				<!-- feature -->
+				<div class="col-md-6 col-lg-4 feature">
+					<i class="ti-reload"></i>
+					<div class="feature-content">
+						<h4>Instant Exchange</h4>
+						<p>Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum. </p>
+						<a href="" class="readmore">Readmore</a>
+					</div>
+				</div>
+				<!-- feature -->
+				<div class="col-md-6 col-lg-4 feature">
+					<i class="ti-panel"></i>
+					<div class="feature-content">
+						<h4>Recuring Buys</h4>
+						<p>Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum. </p>
+						<a href="" class="readmore">Readmore</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<!-- Features section end -->
+
+	<!-- Process section -->
+	<section class="process-section spad">
+		<div class="container">
+			<div class="section-title text-center">
+				<h2>Get Started With Bitcoin</h2>
+				<p>Start learning about Bitcoin with interactive tutorials. It’s fun, easy, and takes only a few minutes! </p>
+			</div>
+			<div class="row">
+				<div class="col-md-4 process">
+					<div class="process-step">
+						<figure class="process-icon">
+							<img src="/static/img/process-icons/1.png" alt="#">
+						</figure>
+						<h4>Create Your Wallet</h4>
+						<p>Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum. </p>
+					</div>
+				</div>
+				<div class="col-md-4 process">
+					<div class="process-step">
+						<figure class="process-icon">
+							<img src="/static/img/process-icons/2.png" alt="#">
+						</figure>
+						<h4>Create Your Wallet</h4>
+						<p>Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum. </p>
+					</div>
+				</div>
+				<div class="col-md-4 process">
+					<div class="process-step">
+						<figure class="process-icon">
+							<img src="/static/img/process-icons/3.png" alt="#">
+						</figure>
+						<h4>Create Your Wallet</h4>
+						<p>Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum. </p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<!-- Process section end -->
+
+	<!-- Fact section -->
+	<section class="fact-section gradient-bg">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-6 col-md-6 col-lg-3">
+					<div class="fact">
+						<h2>60</h2>
+						<p>Support <br> Countries</p>
+						<i class="ti-basketball"></i>
+					</div>
+				</div>
+				<div class="col-sm-6 col-md-6 col-lg-3">
+					<div class="fact">
+						<h2>12K</h2>
+						<p>Transactions  <br> per hour</p>
+						<i class="ti-panel"></i>
+					</div>
+				</div>
+				<div class="col-sm-6 col-md-6 col-lg-3">
+					<div class="fact">
+						<h2>5B</h2>
+						<p>Largest <br> Transactions</p>
+						<i class="ti-stats-up"></i>
+					</div>
+				</div>
+				<div class="col-sm-6 col-md-6 col-lg-3">
+					<div class="fact">
+						<h2>240</h2>
+						<p>Years <br> of Experience</p>
+						<i class="ti-user"></i>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<!-- Fact section end -->
+
+	<!-- Team section -->
+	<section class="team-section spad">
+		<div class="container">
+			<div class="section-title text-center">
+				<h2>Meet Our Team</h2>
+				<p>Our experts in the field of crypto currency can always help you with any of your questions!</p>
+			</div>
+		</div>
+		<div class="team-members clearfix">
+			<!-- Team member -->
+			<div class="member">
+				<div class="member-text">
+					<div class="member-img set-bg" data-setbg="/static/img/member/1.jpg"></div>
+					<h2>Tom Binegar</h2>
+					<span>Business Development</span>
+				</div>
+				<div class="member-social">
+					<a href=""><i class="fa fa-facebook"></i></a>
+					<a href=""><i class="fa fa-linkedin"></i></a>
+					<a href=""><i class="fa fa-twitter"></i></a>
+				</div>
+				<div class="member-info">
+					<div class="member-img mf set-bg" data-setbg="/static/img/member/1.jpg"></div>
+					<div class="member-meta">
+						<h2>Tom Binegar</h2>
+						<span>Marketing Director</span>
+					</div>
+					<p>Jackson Nash is a full-time faculty member of the Marketing and Behavioural Science Division at the Sauder School of Business at UBC. He leads the Entrepreneurship Group, in the undergraduate and graduate programs, teaching actively in both of these.</p>
+				</div>
+			</div>
+			<!-- Team member -->
+			<div class="member">
+				<div class="member-text">
+					<div class="member-img set-bg" data-setbg="/static/img/member/2.jpg"></div>
+					<h2>Jackson Nash</h2>
+					<span>Business Development</span>
+				</div>
+				<div class="member-social">
+					<a href=""><i class="fa fa-facebook"></i></a>
+					<a href=""><i class="fa fa-linkedin"></i></a>
+					<a href=""><i class="fa fa-twitter"></i></a>
+				</div>
+				<div class="member-info">
+					<div class="member-img mf set-bg" data-setbg="/static/img/member/2.jpg"></div>
+					<div class="member-meta">
+						<h2>Jackson Nash</h2>
+						<span>Marketing Director</span>
+					</div>
+					<p>Jackson Nash is a full-time faculty member of the Marketing and Behavioural Science Division at the Sauder School of Business at UBC. He leads the Entrepreneurship Group, in the undergraduate and graduate programs, teaching actively in both of these.</p>
+				</div>
+			</div>
+			<!-- Team member -->
+			<div class="member">
+				<div class="member-text">
+					<div class="member-img set-bg" data-setbg="/static/img/member/3.jpg"></div>
+					<h2>Tom Binegar</h2>
+					<span>Business Development</span>
+				</div>
+				<div class="member-social">
+					<a href=""><i class="fa fa-facebook"></i></a>
+					<a href=""><i class="fa fa-linkedin"></i></a>
+					<a href=""><i class="fa fa-twitter"></i></a>
+				</div>
+				<div class="member-info">
+					<div class="member-img mf set-bg" data-setbg="/static/img/member/3.jpg"></div>
+					<div class="member-meta">
+						<h2>Aaron Ballance</h2>
+						<span>Ceo Bitcoin</span>
+					</div>
+					<p>Jackson Nash is a full-time faculty member of the Marketing and Behavioural Science Division at the Sauder School of Business at UBC. He leads the Entrepreneurship Group, in the undergraduate and graduate programs, teaching actively in both of these.</p>
+				</div>
+			</div>
+			<!-- Team member -->
+			<div class="member">
+				<div class="member-text">
+					<div class="member-img set-bg" data-setbg="/static/img/member/4.jpg"></div>
+					<h2>Melissa Barth</h2>
+					<span>Product Manager</span>
+				</div>
+				<div class="member-social">
+					<a href=""><i class="fa fa-facebook"></i></a>
+					<a href=""><i class="fa fa-linkedin"></i></a>
+					<a href=""><i class="fa fa-twitter"></i></a>
+				</div>
+				<div class="member-info">
+					<div class="member-img mf set-bg" data-setbg="/static/img/member/4.jpg"></div>
+					<div class="member-meta">
+						<h2>Melissa Barth</h2>
+						<span>Product Manager</span>
+					</div>
+					<p>Jackson Nash is a full-time faculty member of the Marketing and Behavioural Science Division at the Sauder School of Business at UBC. He leads the Entrepreneurship Group, in the undergraduate and graduate programs, teaching actively in both of these.</p>
+				</div>
+			</div>
+			<!-- Team member -->
+			<div class="member">
+				<div class="member-text">
+					<div class="member-img set-bg" data-setbg="/static/img/member/5.jpg"></div>
+					<h2>Katy Abrams</h2>
+					<span>Head of Design</span>
+				</div>
+				<div class="member-social">
+					<a href=""><i class="fa fa-facebook"></i></a>
+					<a href=""><i class="fa fa-linkedin"></i></a>
+					<a href=""><i class="fa fa-twitter"></i></a>
+				</div>
+				<div class="member-info">
+					<div class="member-img mf set-bg" data-setbg="/static/img/member/5.jpg"></div>
+					<div class="member-meta">
+						<h2>Katy Abrams</h2>
+						<span>Head of Design</span>
+					</div>
+					<p>Jackson Nash is a full-time faculty member of the Marketing and Behavioural Science Division at the Sauder School of Business at UBC. He leads the Entrepreneurship Group, in the undergraduate and graduate programs, teaching actively in both of these.</p>
+				</div>
+			</div>
+		</div>
+	</section>
+	<!-- Team section -->
+
+
+	<!-- Review section -->
+	<section class="review-section spad">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-8 push-8">
+					<img src="/static/img/quote.png" alt="" class="quote mb-5">
+					<div class="review-text-slider owl-carousel">
+						<div class="review-text">
+							<p>"Bitcoin is exciting because it shows how cheap it can be. Bitcoin is better than currency in that you don’t have to be physically in the same place and, of course, for large transactions, currency can get pretty inconvenient.”</p>
+						</div>
+						<div class="review-text">
+							<p>"Bitcoin is exciting because it shows how cheap it can be. Bitcoin is better than currency in that you don’t have to be physically in the same place and, of course, for large transactions, currency can get pretty inconvenient.”</p>
+						</div>
+						<div class="review-text">
+							<p>"Bitcoin is exciting because it shows how cheap it can be. Bitcoin is better than currency in that you don’t have to be physically in the same place and, of course, for large transactions, currency can get pretty inconvenient.”</p>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-4 pr-0 pull-3">
+					<div class="review-meta-slider owl-carousel pt-5">
+						<div class="author-meta">
+							<div class="author-avatar set-bg" data-setbg="/static/img/review/1.jpg"></div>
+							<div class="author-name">
+								<h4>Aaron Ballance</h4>
+								<p>Ceo Bitcoin</p>
+							</div>
+						</div>
+						<div class="author-meta">
+							<div class="author-avatar set-bg" data-setbg="/static/img/review/2.jpg"></div>
+							<div class="author-name">
+								<h4>Jackson Nash</h4>
+								<p>Head of Design</p>
+							</div>
+						</div>
+						<div class="author-meta">
+							<div class="author-avatar set-bg" data-setbg="/static/img/review/3.jpg"></div>
+							<div class="author-name">
+								<h4>Katy Abrams</h4>
+								<p>Product Manager</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<!-- Review section end -->
+
+
+	<!-- Newsletter section -->
+	<section class="newsletter-section gradient-bg">
+		<div class="container text-white">
+			<div class="row">
+				<div class="col-lg-7 newsletter-text">
+					<h2>Subscribe to our Newsletter</h2>
+					<p>Sign up for our weekly industry updates, insider perspectives and in-depth market analysis.</p>
+				</div>
+				<div class="col-lg-5 col-md-8 offset-lg-0 offset-md-2">
+					<form class="newsletter-form">
+						<input type="text" placeholder="Enter your email">
+						<button>Get Started</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</section>
+	<!-- Newsletter section end -->
+
+
+
+	<!-- Blog section -->
+	<section class="blog-section spad">
+		<div class="container">
+			<div class="section-title text-center">
+				<h2>Latest News</h2>
+				<p>Bitcoin is the simplest way to exchange money at very low cost.</p>
+			</div>
+			<div class="row">
+				<!-- blog item -->
+				<div class="col-md-4">
+					<div class="blog-item">
+						<figure class="blog-thumb">
+							<img src="/static/img/blog/1.jpg" alt="">
+						</figure>
+						<div class="blog-text">
+							<div class="post-date">03 jan 2018</div>
+							<h4 class="blog-title"><a href="">Coinbase to Reopen the GDAX Bitcoin Cash-Euro Order Book</a></h4>
+							<div class="post-meta">
+								<a href=""><span>by</span> Admin</a>
+								<a href=""><i class="fa fa-heart-o"></i> 234 Likes</a>
+								<a href=""><i class="fa fa-comments-o"></i> 08 comments</a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- blog item -->
+				<div class="col-md-4">
+					<div class="blog-item">
+						<figure class="blog-thumb">
+							<img src="/static/img/blog/2.jpg" alt="">
+						</figure>
+						<div class="blog-text">
+							<div class="post-date">28 dec 2018</div>
+							<h4 class="blog-title"><a href="">Blockchain Rolls Out Trading Feature for 22 States in the U.S</a></h4>
+							<div class="post-meta">
+								<a href=""><span>by</span> Admin</a>
+								<a href=""><i class="fa fa-heart-o"></i> 234 Likes</a>
+								<a href=""><i class="fa fa-comments-o"></i> 08 comments</a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- blog item -->
+				<div class="col-md-4">
+					<div class="blog-item">
+						<figure class="blog-thumb">
+							<img src="/static/img/blog/3.jpg" alt="">
+						</figure>
+						<div class="blog-text">
+							<div class="post-date">28 aug 2018</div>
+							<h4 class="blog-title"><a href="">This Week in Bitcoin: Up, Down and Sideways</a></h4>
+							<div class="post-meta">
+								<a href=""><span>by</span> Admin</a>
+								<a href=""><i class="fa fa-heart-o"></i> 234 Likes</a>
+								<a href=""><i class="fa fa-comments-o"></i> 08 comments</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<!-- Blog section end -->
+
+
+	<!-- Footer section -->
+	<footer class="footer-section">
+		<div class="container">
+			<div class="row spad">
+				<div class="col-md-6 col-lg-3 footer-widget">
+					<img src="/static/img/logo.png" class="mb-4" alt="">
+					<p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia dese mollit anim id est laborum.</p>
+					<span><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. --></span>
+				</div>
+				<div class="col-md-6 col-lg-2 offset-lg-1 footer-widget">
+					<h5 class="widget-title">Resources</h5>
+					<ul>
+						<li><a href="#">How to Buy Coin</a></li>
+						<li><a href="#">Coin Overview</a></li>
+						<li><a href="#">Blog News</a></li>
+						<li><a href="#">How to Sell Coin</a></li>
+						<li><a href="#">Purchase Theme</a></li>
+					</ul>
+				</div>
+				<div class="col-md-6 col-lg-2 offset-lg-1 footer-widget">
+					<h5 class="widget-title">Quick Links</h5>
+					<ul>
+						<li><a href="#">Network Stats</a></li>
+						<li><a href="#">Block Explorers</a></li>
+						<li><a href="#">Governance</a></li>
+						<li><a href="#">Exchange Markets</a></li>
+						<li><a href="#">Get Theme</a></li>
+					</ul>
+				</div>
+				<div class="col-md-6 col-lg-3 footer-widget pl-lg-5 pl-3">
+					<h5 class="widget-title">Follow Us</h5>
+					<div class="social">
+						<a href="" class="facebook"><i class="fa fa-facebook"></i></a>
+						<a href="" class="google"><i class="fa fa-google-plus"></i></a>
+						<a href="" class="instagram"><i class="fa fa-instagram"></i></a>
+						<a href="" class="twitter"><i class="fa fa-twitter"></i></a>
+					</div>
+				</div>
+			</div>
+			<div class="footer-bottom">
+				<div class="row">
+					<div class="col-lg-4 store-links text-center text-lg-left pb-3 pb-lg-0">
+						<a href=""><img src="/static/img/appstore.png" alt="" class="mr-2"></a>
+						<a href=""><img src="/static/img/playstore.png" alt=""></a>
+					</div>
+					<div class="col-lg-8 text-center text-lg-right">
+						<ul class="footer-nav">
+							<li><a href="">DPA</a></li>
+							<li><a href="">Terms of Use</a></li>
+							<li><a href="">Privacy Policy </a></li>
+							<li><a href="">support@company.com</a></li>
+							<li><a href="">(123) 456-7890</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</footer>
+
+
+	<!--====== Javascripts & Jquery ======-->
+	<script src="/static/js/jquery-3.2.1.min.js"></script>
+	<script src="/static/js/owl.carousel.min.js"></script>
+	<script src="/static/js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/selenium-webdriver/4.0.0-alpha.8/selenium-webdriver.js"></script>
+  <!-- Place this script block at the end of your trading.html, before the closing </body> tag -->
+  <script>
+    // Function to scrape the symbol and set it in the context
+    function scrapeSymbol() {
+        const classToFind = "js-button-text.text-GwQQdU8S.text-cq__ntSC";
+        const xpath = '//*[@id="header-toolbar-symbol-search"]/div';
+
+        try {
+            const symbolElement = document.querySelector(`.${classToFind}`);
+            if (symbolElement) {
+                const symbol = symbolElement.textContent;
+                console.log("Scraped symbol (by class):", symbol);
+
+                // Set the symbol value in the placeholder element
+                document.getElementById('symbol-placeholder').textContent = symbol;
+
+                // Set the symbol value in the hidden input field for the form submission
+                document.getElementById('trade_symbol').value = symbol;
+            } else {
+                const xpathElement = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+                if (xpathElement) {
+                    const symbol = xpathElement.textContent;
+                    console.log("Scraped symbol (by XPath):", symbol);
+
+                    // Set the symbol value in the placeholder element
+                    document.getElementById('symbol-placeholder').textContent = symbol;
+
+                    // Set the symbol value in the hidden input field for the form submission
+                    document.getElementById('trade_symbol').value = symbol;
+                } else {
+                    console.log("Symbol not found.");
+                }
+            }
+        } catch (error) {
+            console.error("Error occurred during scraping:", error);
+        }
+    }
+
+    // Function to load the symbol when the page is opened
+    function loadSymbolOnPageLoad() {
+        scrapeSymbol();
+    }
+
+    // Add an event listener to the chart container element
+    const chartContainer = document.getElementById('tradingview_13fd6');
+    chartContainer.addEventListener('click', () => {
+        scrapeSymbol();
+    });
+
+    // Load the symbol when the page is opened
+    loadSymbolOnPageLoad();
+	// This script is not required for the star checkbox functionality, but you can use it to handle additional actions when the checkbox is clicked.
+	const starCheckbox = document.getElementById('Row1'); // Replace 'Row1' with the unique ID of the checkbox.
+  
+	starCheckbox.addEventListener('click', () => {
+	  // Perform additional actions here if needed.
+	});
+  </script>
+  
+</body>
+</html>
+
